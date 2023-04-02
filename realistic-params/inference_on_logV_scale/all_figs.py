@@ -118,7 +118,7 @@ def make_figure():
     ax.plot(t, p_tanh(t, t_treat, T_max, p0, epsilon), color="red", ls='-',
             label="Tanh")
     ax.set_xlabel('Time')
-    ax.set_ylabel('Production rate, p')
+    ax.set_ylabel(r'Production rate, $p$')
     # ax.set_title("Comparing the two forms of the production rate")
     ax.legend()
 
@@ -152,8 +152,7 @@ def make_figure():
 
     for j, tol in enumerate(tolerances):
 
-        # Generate synthetic data (at tolerance 10^(-13) with p a
-        # step function)
+        # Generate synthetic data (at tolerance 10^(-13)
         m = Model(y0, 'RK45', t_treat=t_treat, p_fn=p_fns[j])
         m.set_tolerance(1e-13)
         times = np.linspace(0, 7, 8)
@@ -188,7 +187,7 @@ def make_figure():
                 color=colors[j], ls=lines[j], lw=widths[j])
         ax.legend()
         ax.set_xlabel('Time')
-        ax.set_ylabel(r'$\log(V(t))$')
+        ax.set_ylabel(r'$\log_{10}(V(t))$')
         # ax.set_title("Forward solutions at true parameter values")
 
         if j == 0:
