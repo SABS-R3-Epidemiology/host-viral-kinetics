@@ -180,18 +180,14 @@ def make_figure():
             ax = sim_axes[0]
 
         # Plot synthetic data
-        # ax.scatter(times, y, s=7.0, label='Data', color=colors[j])
         ax.scatter(times, y, s=7.0, color=colors[j])
 
         # Plot solution
-        # ax.plot(dense_times, y_true, label="Tol={}".format(tol),
-        #         color=colors[j], ls=lines[j], lw=widths[j])
         ax.plot(dense_times, y_true, label="tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
         ax.legend()
         ax.set_xlabel('Time')
         ax.set_ylabel(r'$\log_{10}(V(t))$')
-        # ax.set_title("Forward solutions at true parameter values")
 
         if j == 0:
             # Save axes
@@ -208,8 +204,6 @@ def make_figure():
         m.set_tolerance(tol)
 
         # Plot likelihood slices and synthetic data
-        # param_range = np.linspace(1.80 * 10**(-6), 1.82 * 10**(-6), 100)
-        # param_range = np.linspace(1.76 * 10**(-6), 1.86 * 10**(-6), 100)
         param_range = np.linspace(1.71 * 10**(-6), 1.91 * 10**(-6), 100)
         lls = []
         for mp in param_range:
@@ -217,8 +211,6 @@ def make_figure():
             lls.append(likelihood(true_params))
 
         # Plot log-likelihood slices
-        # ax.plot(param_range, lls, label='Tol={}'.format(tol),
-        #         color=colors[j], ls=lines[j], lw=widths[j])
         ax.plot(param_range, lls, label="Tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
 
