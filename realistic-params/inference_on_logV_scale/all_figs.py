@@ -4,6 +4,12 @@ import numpy as np
 import pints
 import scipy.integrate
 
+# making fonts consistent
+import matplotlib as mpl
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.latex.preamble'] = \
+r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}'
+
 
 def production_rate_step(t, t_treat, p0, epsilon):
     "Step function production rate, p."
@@ -126,7 +132,7 @@ def make_figure():
 
     # Define styles
     lines = ['-', ':', '--']
-    colors = ['k', 'red', 'royalblue']
+    colors = ['black', 'red', 'royalblue']
     widths = [1, 1.25, 2]
     labels = ["Step", "Tanh", "Step"]
 
@@ -180,7 +186,7 @@ def make_figure():
         # Plot solution
         # ax.plot(dense_times, y_true, label="Tol={}".format(tol),
         #         color=colors[j], ls=lines[j], lw=widths[j])
-        ax.plot(dense_times, y_true, label="Tol={}, {}".format(tol, labels[j]),
+        ax.plot(dense_times, y_true, label="tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
         ax.legend()
         ax.set_xlabel('Time')
