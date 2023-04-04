@@ -27,13 +27,14 @@ def production_rate_tanh(t, t_treat, T_max, p0, epsilon):
 
 class Model(pints.ForwardModel):
     def __init__(self, y0, solver, step_size=None, tolerance=None,
-                 t_treat=2.775, p_fn="Step"):
+                 t_treat=2.775, p_fn="Step", limit_of_quant=True):
         self.y0 = y0
         self.solver = solver
         self.step_size = step_size
         self.tolerance = tolerance
         self.t_treat = t_treat
         self.p_fn = p_fn
+        self.limit_of_quant = limit_of_quant
 
     def set_step_size(self, step_size):
         """Update the solver step size.
@@ -90,8 +91,9 @@ class Model(pints.ForwardModel):
         if y.ndim >= 2:
             y = res.y[2]
 
-        # limit of quantification
-        y[y < 10**(0.7)] = 10**(0.7)
+        if self.limit_of_quant is True:
+            # limit of quantification
+            y[y < 10**(0.7)] = 10**(0.7)
 
         return np.log10(y)
 
@@ -109,17 +111,12 @@ def make_figure():
     t = np.linspace(2.5, 3, 1000)
     p_step = np.vectorize(production_rate_step)
     p_tanh = np.vectorize(production_rate_tanh)
-    # ax.plot(t, p_step(t, t_treat, p0, epsilon), color="black",
-    #         label="Step function")
-    # ax.plot(t, p_tanh(t, t_treat, T_max, p0, epsilon), color="red", ls='-',
-    #         label="Hyperbolic tangent\n function")
     ax.plot(t, p_step(t, t_treat, p0, epsilon), color="black",
             label="Step")
     ax.plot(t, p_tanh(t, t_treat, T_max, p0, epsilon), color="red", ls='-',
             label="Tanh")
     ax.set_xlabel('Time')
     ax.set_ylabel(r'Production rate, $p$')
-    # ax.set_title("Comparing the two forms of the production rate")
     ax.legend()
 
     chg_param_idx = 0
@@ -152,8 +149,8 @@ def make_figure():
 
     for j, tol in enumerate(tolerances):
 
-        # Generate synthetic data (at tolerance 10^(-13)
-        m = Model(y0, 'RK45', t_treat=t_treat, p_fn=p_fns[j])
+        # Generate synthetic data (at tolerance 10^(-13))
+        m = Model(y0, 'RK45', t_treat=t_treat, p_fn=p_fns[j], limit_of_quant=False)
         m.set_tolerance(1e-13)
         times = np.linspace(0, 7, 8)
         y = m.simulate(true_params[:-1], times)
