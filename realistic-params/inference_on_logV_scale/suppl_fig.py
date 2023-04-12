@@ -12,7 +12,24 @@ r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}'
 
 
 def production_rate_step(t, t_treat, p0, epsilon):
-    "Step function production rate, p."
+    """"Step function production rate, p.
+    
+    Parameters
+    ----------
+    t : float
+        Time
+    t_treat : float
+        Treatment time
+    p0 : float
+        Production rate with no treatment (i.e. a placebo)
+    epsilon : float
+        Antiviral efficacy
+
+    Returns
+    -------
+    float
+        Production rate of virus
+    """
 
     if t < t_treat:
         p = p0
@@ -23,7 +40,26 @@ def production_rate_step(t, t_treat, p0, epsilon):
 
 
 def production_rate_tanh(t, t_treat, T_max, p0, epsilon):
-    "Hyperbolic tan production rate."
+    """Hyperbolic tan production rate.
+    
+    Parameters
+    ----------
+    t : float
+        Time
+    t_treat : float
+        Treatment time
+    T_max : float
+        Time to reach maximum concentration of oseltamivir in the plasma
+    p0 : float
+        Production rate with no treatment (i.e. a placebo)
+    epsilon : float
+        Antiviral efficacy
+
+    Returns
+    -------
+    float
+        Production rate of virus
+    """
 
     arg = (t-(t_treat + 0.5 * T_max))/(0.25 * T_max)
     p = - (p0 * epsilon/2) * np.tanh(arg) + p0 - (p0 * epsilon/2)
@@ -34,6 +70,25 @@ def production_rate_tanh(t, t_treat, T_max, p0, epsilon):
 class Model(pints.ForwardModel):
     def __init__(self, y0, solver, step_size=None, tolerance=None,
                  t_treat=2.775, p_fn="Step", limit_of_quant=True):
+        """Initialises a Model object.
+
+        Parameters
+        ----------
+        y0 : 3 x 1 np.array
+            Initial conditions [T_0, I_0, V_0]
+        solver : string
+            ODE solver
+        step size : float (or None)
+            Step size
+        tolerance : float (or None)
+            Tolerance
+        t_treat : float
+            Treatment time
+        p_fn : String
+            Form of the production rate
+        limit_of_quant : Boolean
+            Determines whether or not the limit of quantification/ detection applies
+        """
         self.y0 = y0
         self.solver = solver
         self.step_size = step_size
@@ -53,7 +108,7 @@ class Model(pints.ForwardModel):
         self.step_size = step_size
 
     def set_tolerance(self, tolerance):
-        """Update the solver rtol.
+        """Update the solver rtol and atol.
 
         Parameters
         ----------
@@ -66,6 +121,16 @@ class Model(pints.ForwardModel):
         return 5
 
     def simulate(self, parameters, times):
+        """Numerically solves the within-host model.
+        
+        Parameters
+        ----------
+        parameters : list of length 4
+            Parameters [beta, delta, p0, c] for the within-host model
+        times : np.array
+            Times at which to solve the ODE model
+        
+        """
         beta, delta, p0, c, epsilon = parameters
 
         def fun(t, y):
@@ -91,6 +156,7 @@ class Model(pints.ForwardModel):
             t_eval=times,
             method=self.solver,
             rtol=self.tolerance,
+            atol=self.tolerance,
             step_size=self.step_size
         )
         y = res.y
@@ -103,7 +169,23 @@ class Model(pints.ForwardModel):
 
         return np.log10(y)
 
-def likelihood_slice(fig, ax, chg_param_idx, param_start, param_stop, label):
+def likelihood_slice(ax, chg_param_idx, param_start, param_stop, label):
+    """Plots the log-likelihood as one parameter is varied, and the others
+    are fixed at their true values.
+    
+    Parameters
+    ----------    
+    ax : Axes object
+        Axes to plot on
+    chg_param_idx : int
+        Parameter which is allowed to vary
+    param_start : float
+        Start of parameter range to be considered
+    param_stop :
+        End of parameter range to be considered
+    label : string
+        x-axis label
+    """
 
 
     tolerances = [1e-3, 1e-3, 1e-8]
@@ -158,7 +240,7 @@ def likelihood_slice(fig, ax, chg_param_idx, param_start, param_stop, label):
             lls.append(likelihood(params))
 
         # Plot log-likelihood slices
-        ax.plot(param_range, lls, label="Tol={}, {}".format(tol, labels[j]),
+        ax.plot(param_range, lls, label="tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
 
         # Reset true_params
@@ -171,6 +253,7 @@ def likelihood_slice(fig, ax, chg_param_idx, param_start, param_stop, label):
 
 
 def make_figure():
+    """Makes the within-host model figure in the supplementary materials section."""
 
     fig = plt.figure()
 
@@ -193,7 +276,7 @@ def make_figure():
     for i in range(len(param_start)):
         ax = fig.add_subplot(2, 2, i+1)
         chg_param_idx = i + 1
-        likelihood_slice(fig, ax, chg_param_idx, param_start[i], param_stop[i], labels[i])
+        likelihood_slice(ax, chg_param_idx, param_start[i], param_stop[i], labels[i])
 
     # Collect lines
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
