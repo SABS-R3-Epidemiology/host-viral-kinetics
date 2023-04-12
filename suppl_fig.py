@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pints
@@ -12,7 +11,7 @@ r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}'
 
 
 def production_rate_step(t, t_treat, p0, epsilon):
-    """"Step function production rate, p.
+    """Step function production rate, p.
     
     Parameters
     ----------
@@ -40,7 +39,7 @@ def production_rate_step(t, t_treat, p0, epsilon):
 
 
 def production_rate_tanh(t, t_treat, T_max, p0, epsilon):
-    """Hyperbolic tan production rate.
+    """Hyperbolic tangent production rate.
     
     Parameters
     ----------
@@ -78,9 +77,9 @@ class Model(pints.ForwardModel):
             Initial conditions [T_0, I_0, V_0]
         solver : string
             ODE solver
-        step size : float (or None)
+        step size : float (or None if an adaptive solver is to be used)
             Step size
-        tolerance : float (or None)
+        tolerance : float (or None if a fixed time step solver is to be used)
             Tolerance
         t_treat : float
             Treatment time
@@ -118,6 +117,8 @@ class Model(pints.ForwardModel):
         self.tolerance = tolerance
 
     def n_parameters(self):
+        """Number of parameters in the ODE model
+        (or the length of the parameters list)"""
         return 5
 
     def simulate(self, parameters, times):
@@ -125,8 +126,9 @@ class Model(pints.ForwardModel):
         
         Parameters
         ----------
-        parameters : list of length 4
-            Parameters [beta, delta, p0, c] for the within-host model
+        parameters : list of length 5
+            Parameters [beta, delta, p0, c, epsilon] for
+            the within-host model
         times : np.array
             Times at which to solve the ODE model
         
@@ -164,10 +166,11 @@ class Model(pints.ForwardModel):
             y = res.y[2]
 
         if self.limit_of_quant is True:
-            # limit of quantification
+            # apply limit of detection/ quantification
             y[y < 10**(0.7)] = 10**(0.7)
 
         return np.log10(y)
+
 
 def likelihood_slice(ax, chg_param_idx, param_start, param_stop, label):
     """Plots the log-likelihood as one parameter is varied, and the others
@@ -221,7 +224,7 @@ def likelihood_slice(ax, chg_param_idx, param_start, param_stop, label):
         np.random.seed(123)
         y += np.random.normal(0, true_params[-1], len(times))
 
-        # apply the limit of quantification (in case the error is negative)
+        # apply the limit of quantification
         y[y < 0.7] = 0.7
 
         # Make likelihood
@@ -231,7 +234,7 @@ def likelihood_slice(ax, chg_param_idx, param_start, param_stop, label):
         likelihood = pints.GaussianLogLikelihood(problem)
         m.set_tolerance(tol)
 
-        # Plot likelihood slices and synthetic data
+        # Plot log-likelihood slices
         param_range = np.linspace(param_start, param_stop, 100)
         lls = []
         params = true_params.copy()
@@ -239,16 +242,11 @@ def likelihood_slice(ax, chg_param_idx, param_start, param_stop, label):
             params[chg_param_idx] = mp
             lls.append(likelihood(params))
 
-        # Plot log-likelihood slices
         ax.plot(param_range, lls, label="tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
 
-        # Reset true_params
-        true_params[chg_param_idx] = true_params[chg_param_idx]
-
     ax.set_xlabel(label)
     ax.set_ylabel('Log-likelihood')
-    # ax.legend()
 
 
 
@@ -257,22 +255,19 @@ def make_figure():
 
     fig = plt.figure()
 
-    # param_start, param_stop = 1.71 * 10**(-6), 1.91 * 10**(-6)
-    # ax = fig.add_subplot(2, 2, 1)
-    # chg_param_idx = 0
-    # likelihood_slice(fig, ax, chg_param_idx, param_start, param_stop)
-
+    # Define parameters
     p0 = 0.661
     beta = (1.81 * 10**(-6))
     delta = 7.07
     c = 14.8
     epsilon = 0.9738
-    beta, delta, p0, c, epsilon
 
+    # Intervals to be considered
     param_start = [delta - 0.5, p0 - 0.1, c -0.5, epsilon - 0.1]
     param_stop = [delta + 0.5, p0 + 0.1, c + 0.5, epsilon + 0.1]
     labels = [r'$\delta$', r'$p_0$', r'$c$', r'$\epsilon$']
 
+    # Create subplots
     for i in range(len(param_start)):
         ax = fig.add_subplot(2, 2, i+1)
         chg_param_idx = i + 1
@@ -286,7 +281,6 @@ def make_figure():
 
     # Add legend
     fig.legend(lines_unique, labels, loc="upper right")
-    # fig.legend(lines_unique, labels)
 
     plt.show()
 

@@ -11,7 +11,7 @@ r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}'
 
 
 def production_rate_step(t, t_treat, p0, epsilon):
-    """"Step function production rate, p.
+    """Step function production rate, p.
     
     Parameters
     ----------
@@ -39,7 +39,7 @@ def production_rate_step(t, t_treat, p0, epsilon):
 
 
 def production_rate_tanh(t, t_treat, T_max, p0, epsilon):
-    """Hyperbolic tan production rate.
+    """Hyperbolic tangent production rate.
     
     Parameters
     ----------
@@ -77,9 +77,9 @@ class Model(pints.ForwardModel):
             Initial conditions [T_0, I_0, V_0]
         solver : string
             ODE solver
-        step size : float (or None)
+        step size : float (or None if an adaptive solver is to be used)
             Step size
-        tolerance : float (or None)
+        tolerance : float (or None if a fixed time step solver is to be used)
             Tolerance
         t_treat : float
             Treatment time
@@ -117,6 +117,8 @@ class Model(pints.ForwardModel):
         self.tolerance = tolerance
 
     def n_parameters(self):
+        """Number of parameters in the ODE model
+        (or the length of the parameters list)"""
         return 5
 
     def simulate(self, parameters, times):
@@ -124,8 +126,9 @@ class Model(pints.ForwardModel):
         
         Parameters
         ----------
-        parameters : list of length 4
-            Parameters [beta, delta, p0, c] for the within-host model
+        parameters : list of length 5
+            Parameters [beta, delta, p0, c, epsilon] for
+            the within-host model
         times : np.array
             Times at which to solve the ODE model
         
@@ -163,7 +166,7 @@ class Model(pints.ForwardModel):
             y = res.y[2]
 
         if self.limit_of_quant is True:
-            # limit of quantification
+            # apply limit of detection/ quantification
             y[y < 10**(0.7)] = 10**(0.7)
 
         return np.log10(y)
@@ -171,7 +174,7 @@ class Model(pints.ForwardModel):
 
 def make_figure():
     """Makes the within-host model figure in the main paper
-    (as opposed to the supplementary materials)."""
+    (as opposed to the figure in the supplementary materials)."""
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 3, 1)
@@ -230,7 +233,7 @@ def make_figure():
         np.random.seed(123)
         y += np.random.normal(0, true_params[-1], len(times))
 
-        # apply the limit of quantification (in case the error is negative)
+        # apply the limit of quantification
         y[y < 0.7] = 0.7
 
         # Simulate the forward solution
@@ -270,14 +273,13 @@ def make_figure():
         likelihood = pints.GaussianLogLikelihood(problem)
         m.set_tolerance(tol)
 
-        # Plot likelihood slices and synthetic data
-        param_range = np.linspace(1.71 * 10**(-6), 1.91 * 10**(-6), 100)
+        # Plot log-likelihood slices (for beta)
+        param_range = np.linspace(beta - 0.05 * 10**(-6), beta + 0.05 * 10**(-6), 100)
         lls = []
         for mp in param_range:
             true_params[chg_param_idx] = mp
             lls.append(likelihood(true_params))
 
-        # Plot log-likelihood slices
         ax.plot(param_range, lls, label="Tol={}, {}".format(tol, labels[j]),
                 color=colors[j], ls=lines[j], lw=widths[j])
 
