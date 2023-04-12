@@ -64,7 +64,7 @@ class Model(pints.ForwardModel):
         if y.ndim >= 2:
             y = res.y[2]
 
-        return np.log(y)
+        return np.log10(y)
 
 
 def make_figure():
@@ -83,10 +83,15 @@ def make_figure():
             # Generate data
             y0 = np.asarray([100000, 1.0, 250])
             m = Model(y0, 'RK45', t_treat=0.52)
+            p0 = 0.661
+            beta = (1.81 * 10**(-6))
+            delta = 7.07
+            c = 14.8
+            epsilon = 0.9738
             true_params = [1.0, 1.0, 0.01, 1.0, 0.5, noise]
 
             m.set_tolerance(1e-13)
-            times = np.linspace(0, 1, 25)
+            times = np.linspace(0, 1, 8)
             y = m.simulate(true_params[:-1], times)
             np.random.seed(123)
             y += np.random.normal(0, true_params[-1], len(times))
