@@ -195,7 +195,8 @@ def make_figure():
     ax.set_ylabel(r'Production rate, $p$')
     ax.legend()
 
-    chg_param_idx = 0
+    # Parameter index for delta
+    chg_param_idx = 1
 
     tolerances = [1e-3, 1e-3, 1e-8]
     p_fns = ["Step", "Tanh", "Step"]
@@ -273,8 +274,8 @@ def make_figure():
         likelihood = pints.GaussianLogLikelihood(problem)
         m.set_tolerance(tol)
 
-        # Plot log-likelihood slices (for beta)
-        param_range = np.linspace(beta - 0.05 * 10**(-6), beta + 0.05 * 10**(-6), 100)
+        # Plot log-likelihood slices (for delta)
+        param_range = np.linspace(delta - 0.5, delta + 0.5, 100)
         lls = []
         for mp in param_range:
             true_params[chg_param_idx] = mp
@@ -284,9 +285,9 @@ def make_figure():
                 color=colors[j], ls=lines[j], lw=widths[j])
 
         # Reset true_params
-        true_params[chg_param_idx] = 1.81 * 10**(-6)
+        true_params[chg_param_idx] = 7.07
 
-    ax.set_xlabel(r'$\beta$')
+    ax.set_xlabel(r'$\delta$')
     ax.set_ylabel('Log-likelihood')
     ax.legend()
 

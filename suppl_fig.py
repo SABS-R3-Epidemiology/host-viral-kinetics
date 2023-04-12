@@ -263,15 +263,15 @@ def make_figure():
     epsilon = 0.9738
 
     # Intervals to be considered
-    param_start = [delta - 0.5, p0 - 0.1, c -0.5, epsilon - 0.1]
-    param_stop = [delta + 0.5, p0 + 0.1, c + 0.5, epsilon + 0.1]
-    labels = [r'$\delta$', r'$p_0$', r'$c$', r'$\epsilon$']
+    param_start = [beta - 0.05 * 10**(-6), p0 - 0.1, c -0.5, epsilon - 0.1]
+    param_stop = [beta + 0.05 * 10**(-6), p0 + 0.1, c + 0.5, epsilon + 0.1]
+    labels = [r'$\beta$', r'$p_0$', r'$c$', r'$\epsilon$']
+    chg_param_idxs = [0, 2, 3, 4, ]
 
     # Create subplots
     for i in range(len(param_start)):
         ax = fig.add_subplot(2, 2, i+1)
-        chg_param_idx = i + 1
-        likelihood_slice(ax, chg_param_idx, param_start[i], param_stop[i], labels[i])
+        likelihood_slice(ax, chg_param_idxs[i], param_start[i], param_stop[i], labels[i])
 
     # Collect lines
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes]
