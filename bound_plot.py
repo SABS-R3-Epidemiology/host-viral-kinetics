@@ -50,23 +50,17 @@ def ninety_nine_percent(y):
 def make_figure():
     """Makes the bound figure in the supplementary materials section."""
 
-    # Create plot of mean and mean +/- 3 * standard deviation
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
     y = [pow(10, -i) for i in np.linspace(-5, 5, 10000)]
     expect = np.vectorize(expectation)
     percent = np.vectorize(ninety_nine_percent)
-    # standard_dev = np.vectorize(sd)
 
     ax.plot(y, expect(y), color="black", ls="-",
             label=r"$y = \mathbb{E} \left[ |\mathcal{L} - \mathcal{L}' | \right]$")
     ax.fill_between(y, 0, percent(y), alpha =0.2, color="black",
                     label=r"$ P \left[ |\mathcal{L} - \mathcal{L}' | \leq y \right]$"
                      r"$ \leq 0.99$")
-    # ax.fill_between(y, 0, percent(y), alpha =0.2, color="black",
-    #                 label=r"$ 95 \% \text{ confidence interval for } $"
-    #                 r"$\left[ |\mathcal{L} - \mathcal{L}' | \right]$")
-    # ax.fill_between(y, 0, percent(y), alpha =0.2, color="black")
     ax.set_xscale('log')
 
     # Use a linear scale for y below 10**(-3) (so that the whole shaded region can be shown)
