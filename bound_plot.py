@@ -27,8 +27,9 @@ def expectation(y):
 
     return foldnorm.mean(c=mu/sigma, scale=sigma, loc=0)
 
-def sd(y):
-    """Calculates the standard deviation of |L-L'|.
+def ninety_nine_percent(y):
+    """Calculates the inverse cumulative distribution function of |L-L'|
+    at 0.99.
     
     Parameters
     ----------
@@ -38,13 +39,13 @@ def sd(y):
     Returns
     -------
     float
-        Standard deviation of |L-L'|
+        Inverse cumulative distribution function of |L-L'| at 0.99
     """
 
     mu = y/2
     sigma = np.sqrt(y)
 
-    return np.sqrt(foldnorm.var(c=mu/sigma, scale=sigma, loc=0))
+    return  foldnorm.ppf(q=0.99, c=mu/sigma, scale=sigma, loc=0)
 
 def make_figure():
     """Makes the bound figure in the supplementary materials section."""
@@ -54,20 +55,25 @@ def make_figure():
     ax = fig.add_subplot(1, 1, 1)
     y = [pow(10, -i) for i in np.linspace(-5, 5, 10000)]
     expect = np.vectorize(expectation)
-    standard_dev = np.vectorize(sd)
+    percent = np.vectorize(ninety_nine_percent)
+    # standard_dev = np.vectorize(sd)
 
     ax.plot(y, expect(y), color="black", ls="-",
-            label=r"$\mathbb{E} \left[ |\mathcal{L} - \mathcal{L}' | \right]$")
-    ax.fill_between(y, expect(y) - 3 * standard_dev(y),
-                    expect(y) + 3 * standard_dev(y), alpha =0.2, color="black",
-                    label=r"$\mathbb{E} \left[ |\mathcal{L} - \mathcal{L}' | \right]$"
-                     r"$ \pm 3 \sqrt{\text{Var} \left[ |\mathcal{L}-\mathcal{L}'| \right]}$")
+            label=r"$y = \mathbb{E} \left[ |\mathcal{L} - \mathcal{L}' | \right]$")
+    ax.fill_between(y, 0, percent(y), alpha =0.2, color="black",
+                    label=r"$ P \left[ |\mathcal{L} - \mathcal{L}' | \leq y \right]$"
+                     r"$ \leq 0.99$")
+    # ax.fill_between(y, 0, percent(y), alpha =0.2, color="black",
+    #                 label=r"$ 95 \% \text{ confidence interval for } $"
+    #                 r"$\left[ |\mathcal{L} - \mathcal{L}' | \right]$")
+    # ax.fill_between(y, 0, percent(y), alpha =0.2, color="black")
     ax.set_xscale('log')
 
     # Use a linear scale for y below 10**(-3) (so that the whole shaded region can be shown)
     ax.set_yscale('symlog', linthresh=10**(-3))
-    ax.set_ylim(bottom = 10**(-1000))
+    ax.set_ylim(bottom = 0)
     ax.set_xlabel(r'$\frac{\sum_{i=1}^N a_i^2}{2\sigma^2}$')
+    ax.set_ylabel(r'$y$')
     ax.legend()
 
 
