@@ -66,7 +66,7 @@ def make_figure():
     # Use a linear scale for y below 10**(-3) (so that the whole shaded region can be shown)
     ax.set_yscale('symlog', linthresh=10**(-3))
     ax.set_ylim(bottom = 0)
-    ax.set_xlabel(r'$\frac{\sum_{i=1}^N a_i^2}{2\sigma^2}$')
+    ax.set_xlabel(r'$\frac{\sum_{i=1}^N a_i^2}{\sigma^2}$')
     ax.set_ylabel(r'$y$')
     ax.legend()
 
