@@ -6,11 +6,12 @@ from scipy.stats import foldnorm
 import matplotlib as mpl
 mpl.rcParams['text.usetex'] = True
 mpl.rcParams['text.latex.preamble'] = \
-r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}\usepackage{amsfonts}'
+    r'\usepackage{{amsmath}}\renewcommand{\sfdefault}{phv}\usepackage{amsfonts}'
+
 
 def expectation(y):
     """Calculates the expectation of |L-L'|.
-    
+
     Parameters
     ----------
     t : float
@@ -27,10 +28,11 @@ def expectation(y):
 
     return foldnorm.mean(c=mu/sigma, scale=sigma, loc=0)
 
+
 def ninety_nine_percent(y):
     """Calculates the inverse cumulative distribution function of |L-L'|
     at 0.99.
-    
+
     Parameters
     ----------
     t : float
@@ -45,7 +47,8 @@ def ninety_nine_percent(y):
     mu = y/2
     sigma = np.sqrt(y)
 
-    return  foldnorm.ppf(q=0.99, c=mu/sigma, scale=sigma, loc=0)
+    return foldnorm.ppf(q=0.99, c=mu/sigma, scale=sigma, loc=0)
+
 
 def make_figure():
     """Makes the bound figure in the supplementary materials section."""
@@ -57,19 +60,19 @@ def make_figure():
     percent = np.vectorize(ninety_nine_percent)
 
     ax.plot(y, expect(y), color="black", ls="-",
-            label=r"$y = \mathbb{E} \left[ |\mathcal{L} - \mathcal{L}' | \right]$")
-    ax.fill_between(y, 0, percent(y), alpha =0.2, color="black",
-                    label=r"$ P \left[ |\mathcal{L} - \mathcal{L}' | \leq y \right]$"
-                     r"$ \leq 0.99$")
+            label=r"$y = \mathbb{E} \left[ |D| \right]$")
+    ax.fill_between(y, 0, percent(y), alpha=0.2, color="black",
+                    label=r"$ P \left[ |D| \leq y \right]$"
+                    r"$ \leq 0.99$")
     ax.set_xscale('log')
 
-    # Use a linear scale for y below 10**(-3) (so that the whole shaded region can be shown)
+    # Use a linear scale for y below 10**(-3)
+    # (so that the whole shaded region can be shown)
     ax.set_yscale('symlog', linthresh=10**(-3))
-    ax.set_ylim(bottom = 0)
-    ax.set_xlabel(r'$\frac{\sum_{i=1}^N a_i^2}{\sigma^2}$')
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r'$\frac{\sum_{i=1}^N a_i^2}{(\sigma^\text{True})^2}$')
     ax.set_ylabel(r'$y$')
     ax.legend()
-
 
     plt.show()
 
